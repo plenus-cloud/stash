@@ -38,7 +38,7 @@ func (f *Framework) EventualEvent(meta metav1.ObjectMeta) GomegaAsyncAssertion {
 			"involvedObject.kind":      "Repository",
 			"involvedObject.name":      meta.Name,
 			"involvedObject.namespace": meta.Namespace,
-			"type": core.EventTypeNormal,
+			"type":                     core.EventTypeNormal,
 		})
 		events, err := f.KubeClient.CoreV1().Events(f.namespace).List(metav1.ListOptions{FieldSelector: fieldSelector.String()})
 		Expect(err).NotTo(HaveOccurred())
@@ -52,7 +52,7 @@ func (f *Framework) EventualWarning(meta metav1.ObjectMeta, involvedObjectKind s
 			"involvedObject.kind":      involvedObjectKind,
 			"involvedObject.name":      meta.Name,
 			"involvedObject.namespace": meta.Namespace,
-			"type": core.EventTypeWarning,
+			"type":                     core.EventTypeWarning,
 		})
 		events, err := f.KubeClient.CoreV1().Events(f.namespace).List(metav1.ListOptions{FieldSelector: fieldSelector.String()})
 		Expect(err).NotTo(HaveOccurred())
