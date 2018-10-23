@@ -1,0 +1,80 @@
+# Compile and push customized docker image
+
+Follow the instructions at https://appscode.com/products/stash/0.7.0/setup/developer-guide/overview/
+
+Download the customized sources from https://github.com/plenus-cloud/stash/ in $(go env GOPATH)/src/github.com/appscode/stash
+The last directories of the path must be appscode/stash, do not change this path (the build scripts have this path fixed in)!
+
+Install go vrsion 1.11.1 and then install goimport
+
+Checkout the tag you want to compile
+
+```
+export STASH_TAG=0.7.0-rstc0.9.3
+cd $(go env GOPATH)/src/github.com/appscode/stash
+git checkout ${STASH_TAG}
+```
+
+Install Dev tools
+
+```
+$ ./hack/builddeps.sh
+```
+
+Build Binary
+
+```
+./hack/make.py
+stash version
+```
+
+Build docker image
+
+```
+./hack/docker/setup.sh
+```
+
+Tag and push docker image
+
+```
+docker tag appscode/stash:${STASH_TAG} plenus/stash:${STASH_TAG}
+docker push plenus/stash:${STASH_TAG}
+```
+# Use modified image
+
+Modify stash-operator deployment:
+
+```
+      containers:
+      - args:
+        - run
+        - --v=3
+        - --rbac=true
+        - --docker-registry=appscode
+        - --secure-port=8443
+        - --audit-log-path=-
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --enable-analytics=true
+        image: appscode/stash:0.7.0
+```
+
+becomes:
+
+```
+      containers:
+      - args:
+        - run
+        - --v=3
+        - --rbac=true
+        - --docker-registry=plenus
+        - --image-tag=0.7.0-rstc0.9.3
+        - --secure-port=8443
+        - --audit-log-path=-
+        - --tls-cert-file=/var/serving-cert/tls.crt
+        - --tls-private-key-file=/var/serving-cert/tls.key
+        - --enable-analytics=true
+        image: plenus/stash:0.7.0-rstc0.9.3
+```
+
+Modify all restic objects to redeploy sidecard containers.
